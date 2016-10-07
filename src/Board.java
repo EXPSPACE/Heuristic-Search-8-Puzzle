@@ -284,19 +284,23 @@ public class Board extends Node<Board> {
             for (int i = 0; i < DIMENSION; i++) {
                 for (int j = 0; j < DIMENSION; j++) {
                     if (board.state[i][j] != 0) {
-                        Integer[] value_coords = GOAL_COORDINATE_MAP.get(board.state[i][j]);
-                        //determine if the tile should be before or after by looking at coordinates of following tiles
+                        Integer[] valueGoalStateCoords = GOAL_COORDINATE_MAP.get(board.state[i][j]);
+                        //determine if following tiles should be before or after by looking at coordinates of following tiles
+                        int columnStart = j;
                         for (int k = i; k < DIMENSION; k++) {
-                            for (int l = j; l < DIMENSION; l++) {
+                            //TODO bug
+                            for (int l = columnStart; l < DIMENSION; l++) {
                                 if (board.state[k][l] != 0) {
+                                    //TODO optimize
                                     //check if the row or column of the goal state coords are before or after current tile
-                                    if (value_coords[0] > GOAL_COORDINATE_MAP.get(board.state[k][l])[0]) {
+                                    if (valueGoalStateCoords[0] > GOAL_COORDINATE_MAP.get(board.state[k][l])[0]) {
                                         distance++;
-                                    } else if (value_coords[0] == GOAL_COORDINATE_MAP.get(board.state[k][l])[0] &&
-                                            value_coords[1] > GOAL_COORDINATE_MAP.get(board.state[k][l])[1]) {
+                                    } else if (valueGoalStateCoords[0] == GOAL_COORDINATE_MAP.get(board.state[k][l])[0] &&
+                                            valueGoalStateCoords[1] > GOAL_COORDINATE_MAP.get(board.state[k][l])[1]) {
                                         distance++;
                                     }
                                 }
+                                columnStart = 0;
                             }
                         }
                     }
