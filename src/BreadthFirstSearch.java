@@ -14,15 +14,22 @@ public class BreadthFirstSearch extends SearchAlgorithm {
     @Override
     public void searchTree(Node startNode) {
         Queue<Node> queue = new LinkedList<Node>();
+        ArrayList<Node> closedList = new ArrayList<>();
+
         queue.add(startNode);
         startNode.visited = true;
 
+        //check if element is goal state
+        if (startNode.isGoalState()) {
+            System.out.println("================");
+            System.out.println("GOAL STATE FOUND");
+            System.out.println("================");
+            printPath(startNode);
+            return;
+        }
 
         while (!queue.isEmpty()) {
             Node element = queue.poll();
-
-
-
 
             System.out.println("");
             System.out.println("CURRENT NODE: ");
@@ -30,24 +37,26 @@ public class BreadthFirstSearch extends SearchAlgorithm {
             System.out.println(element.toString(false));
             System.out.println("");
 
-            //check if element is goal state
-            if(element.isGoalState()) {
-                System.out.println("================");
-                System.out.println("GOAL STATE FOUND");
-                System.out.println("================");
-                printPath(element);
-                return;
-            }
 
-            //TODO: add to closed list avoid repeats
+
+            closedList.add(element);
             ArrayList<Node> childNodes = element.getChildNodes();
-            queue.c
+            //TODO num generated nodes
+
             for (Node node : childNodes) {
-                //TODO: check not in closed list
-                if (node != null && !node.visited) {
+                if (node != null && !node.visited && !closedList.contains(node)) {
                     queue.add(node);
                     node.visited = true;
-                    this.parentMap.put(node,element);
+                    this.parentMap.put(node, element);
+
+                    //check if element is goal state
+                    if (node.isGoalState()) {
+                        System.out.println("================");
+                        System.out.println("GOAL STATE FOUND");
+                        System.out.println("================");
+                        printPath(node);
+                        return;
+                    }
                 }
             }
 

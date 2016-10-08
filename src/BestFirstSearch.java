@@ -15,13 +15,14 @@ public class BestFirstSearch extends SearchAlgorithm {
     @Override
     public void searchTree(Node startNode) {
         Comparator<Node> bestFirstComparator = new BestFirstComparator();
-        Queue<Node> queue = new PriorityQueue<Node>(bestFirstComparator);
+        Queue<Node> openList = new PriorityQueue<Node>(bestFirstComparator);
+        ArrayList<Node> closedList = new ArrayList<>();
 
-        queue.add(startNode);
+        openList.add(startNode);
         startNode.visited = true;
 
-        while (!queue.isEmpty()) {
-            Node element = queue.poll();
+        while (!openList.isEmpty()) {
+            Node element = openList.poll();
 
             System.out.println("");
             System.out.println("CURRENT NODE: ");
@@ -37,11 +38,12 @@ public class BestFirstSearch extends SearchAlgorithm {
                 printPath(element);
                 return;
             }
-
+            closedList.add(element);
             ArrayList<Node> childNodes = element.getChildNodes();
+
             for (Node node : childNodes) {
-                if (node != null && !node.visited) {
-                    queue.add(node);
+                if (node != null && !node.visited && !closedList.contains(node)) {
+                    openList.add(node);
                     node.visited = true;
                     this.parentMap.put(node, element);
                 }
@@ -50,7 +52,7 @@ public class BestFirstSearch extends SearchAlgorithm {
             System.out.println("     OPEN LIST NODES:");
             System.out.println("     ===============");
 
-            for (Node node : queue) {
+            for (Node node : openList) {
                 System.out.println(node.toString(true));
             }
         }

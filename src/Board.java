@@ -20,6 +20,7 @@ public class Board extends Node<Board> {
             {7, 6, 5}};
     //maps the value of a tile to the x,y coordinates it should be at in the goal state
     public static final HashMap<Integer, Integer[]> GOAL_COORDINATE_MAP = new HashMap<>();
+    public static final HashMap<Integer, Integer> INDEX_MAP = new HashMap<>();
     public static String HEURISTIC_STRING = null;
     public static HeuristicFunction heuristicFunction = null;
     public static int NODE_ID_COUNTER = 0;
@@ -34,8 +35,6 @@ public class Board extends Node<Board> {
         GOAL_COORDINATE_MAP.put(6, new Integer[]{2, 1});
         GOAL_COORDINATE_MAP.put(5, new Integer[]{2, 2});
     }
-
-    public static final HashMap<Integer, Integer> INDEX_MAP = new HashMap<>();
 
     //local variables
     public int[][] state;
@@ -186,7 +185,19 @@ public class Board extends Node<Board> {
         return sb.toString();
     }
 
-    
+    @Override
+    public boolean equals(Object obj) {
+        Board board = (Board) obj;
+        for (int i = 0; i < DIMENSION; i++) {
+            for (int j = 0; j < DIMENSION; j++) {
+                if (state[i][j] != board.state[i][j]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     public void setHeuristic(int heuristic) {
         switch (heuristic) {
             case HEURISTIC_HAMMING:
@@ -268,7 +279,7 @@ public class Board extends Node<Board> {
     private class NotAdmissable implements HeuristicFunction {
         @Override
         public int getHeuristicValue(Board board) {
-            return 0;
+            return new Hamming().getHeuristicValue(board) + new Manhattan().getHeuristicValue(board);
         }
     }
 
@@ -288,47 +299,25 @@ public class Board extends Node<Board> {
                         //determine if following tiles should be before or after by looking at coordinates of following tiles
                         int columnStart = j;
                         for (int k = i; k < DIMENSION; k++) {
-                            //TODO bug
                             for (int l = columnStart; l < DIMENSION; l++) {
                                 if (board.state[k][l] != 0) {
-                                    //TODO optimize
+                                    Integer[] comparedGoalStateCoords = GOAL_COORDINATE_MAP.get(board.state[k][l]);
                                     //check if the row or column of the goal state coords are before or after current tile
-                                    if (valueGoalStateCoords[0] > GOAL_COORDINATE_MAP.get(board.state[k][l])[0]) {
+                                    if (valueGoalStateCoords[0] > comparedGoalStateCoords[0]) {
                                         distance++;
-                                    } else if (valueGoalStateCoords[0] == GOAL_COORDINATE_MAP.get(board.state[k][l])[0] &&
-                                            valueGoalStateCoords[1] > GOAL_COORDINATE_MAP.get(board.state[k][l])[1]) {
+                                    } else if (valueGoalStateCoords[0] == comparedGoalStateCoords[0] &&
+                                            valueGoalStateCoords[1] > comparedGoalStateCoords[1]) {
                                         distance++;
                                     }
                                 }
-                                columnStart = 0;
+
                             }
+                            columnStart = 0;
                         }
                     }
                 }
             }
             return distance;
         }
-
-//        @Override
-//        public int getHeuristicValue(Board board) {
-//            int distance = 0;
-//            for (int i = 0; i < DIMENSION; i++) {
-//                for (int j = 0; j < DIMENSION; j++) {
-//                    if (board.state[i][j] != 0) {
-//                        int index = INDEX_MAP.get(board.state[i][j]);
-//                        for (int k = i; k < DIMENSION; k++) {
-//                            for (int l = j; j < DIMENSION; j++) {
-//
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//            return distance;
-//        }
-//    }
-
-//    public static void genIndexMap() {
-
-        }
+    }
 }
