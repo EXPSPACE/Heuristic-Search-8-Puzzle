@@ -11,7 +11,7 @@ public class Board extends Node<Board> {
     public static final int HEURISTIC_MANHATTAN = 2;
     public static final int HEURISTIC_MIN_HAM_MAN = 3;
     public static final int HEURISTIC_LEARNING_FEATURES = 4;
-    public static final int HEURISTIC_PERMUTATION = 5;
+    public static final int HEURISTIC_MANHATTAN_PLUS_LINEAR_CONFLICT = 5;
 
     //final goal state for each board - 0 represents the blank state
     public static final int[][] GOAL_STATE = new int[][]{
@@ -134,7 +134,7 @@ public class Board extends Node<Board> {
     public void setBlankXY() {
         for (int i = 0; i < DIMENSION; i++) {
             for (int j = 0; j < DIMENSION; j++) {
-                if(state[i][j] == 0) {
+                if (state[i][j] == 0) {
                     blank_x = i;
                     blank_y = j;
                 }
@@ -227,9 +227,9 @@ public class Board extends Node<Board> {
                 heuristicFunction = new LearningHeuristic();
                 HEURISTIC_STRING = "LEARNING_NOT_ADMISSABLE";
                 break;
-            case HEURISTIC_PERMUTATION:
-                heuristicFunction = new Permutation();
-                HEURISTIC_STRING = "PERMUTATION";
+            case HEURISTIC_MANHATTAN_PLUS_LINEAR_CONFLICT:
+                heuristicFunction = new ManhattanPlusLinearConflict();
+                HEURISTIC_STRING = "MANHATTAN_PLUS_LINEAR_CONFLICT";
                 break;
         }
     }
@@ -276,7 +276,6 @@ public class Board extends Node<Board> {
         }
     }
 
-
     //h2(N) min_hamming_manhattan - minimum between hamming parentDistance and manhattan parentDistance
     //TODO max?
     private class MinHammingManhattan implements HeuristicFunction {
@@ -285,6 +284,8 @@ public class Board extends Node<Board> {
             return Math.min(new Hamming().getHeuristicValue(board), new Manhattan().getHeuristicValue(board));
         }
     }
+
+
 
     //h3(N) - a heuristic that is not admissible, uses a linear combination of hamming and manhattan "features",
     //c1, c2 should be adjusted to fit actual data on solution costs
@@ -296,44 +297,111 @@ public class Board extends Node<Board> {
             int c2 = 2;
             int hammingValue = new Hamming().getHeuristicValue(board);
             int manhattanValue = new Manhattan().getHeuristicValue(board);
-            return  c1 * hammingValue + c2 * manhattanValue;
+            return c1 * hammingValue + c2 * manhattanValue;
         }
     }
 
+    //h4(n) - Manhattan + Linear combination
 
-    //h4(N) sum of permutation inversions - for each numbered tile, count how many tiles on its right should be on its left in the goal state.
-    //(admissible and better than either Manhattan parentDistance or hamming tiles)
-    //TODO not admissable (overestimates by 1?)
-    private class Permutation implements HeuristicFunction {
+    //SOURCE : https://heuristicswiki.wikispaces.com/Manhattan+Distance
+    //SOURCE : https://heuristicswiki.wikispaces.com/Linear+Conflict
+
+    //The limitation of the Manhattan Distance heuristic is that it considers each tile independently, while in fact tiles
+    //interfere with each other. Higher accuracy can be achieved by combining other heuristics, such as the Linear Conflict Heuristic.
+
+    //Linear Conflict Tiles Definition: Two tiles tj and tk are in a linear conflict if tj and tk are in the same line,
+    // the goal positions of tj and tk are both in that line, tj is to the right of tk and goal position of tj is to the
+    // left of the goal position of tk. The linear conflict adds at least two moves to the Manhattan Distance of the two
+    // conflicting tiles, by forcing them to surround one another. Therefore the heuristic function will add a cost of 2
+    // moves for each pair of conflicting tiles.
+
+    private class ManhattanPlusLinearConflict implements HeuristicFunction {
         @Override
         public int getHeuristicValue(Board board) {
-            int distance = 0;
+            int linearConflictDistance = 0;
+            int manhattanDistance = new Manhattan().getHeuristicValue(board);
+
             for (int i = 0; i < DIMENSION; i++) {
                 for (int j = 0; j < DIMENSION; j++) {
                     if (board.state[i][j] != 0) {
                         Integer[] valueGoalStateCoords = GOAL_COORDINATE_MAP.get(board.state[i][j]);
-                        //determine if following tiles should be before or after by looking at coordinates of following tiles
-                        int columnStart = j;
-                        for (int k = i; k < DIMENSION; k++) {
-                            for (int l = columnStart; l < DIMENSION; l++) {
-                                if (board.state[k][l] != 0) {
-                                    Integer[] comparedGoalStateCoords = GOAL_COORDINATE_MAP.get(board.state[k][l]);
-                                    //check if the row or column of the goal state coords are before or after current tile
-                                    if (valueGoalStateCoords[0] > comparedGoalStateCoords[0]) {
-                                        distance++;
-                                    } else if (valueGoalStateCoords[0] == comparedGoalStateCoords[0] &&
-                                            valueGoalStateCoords[1] > comparedGoalStateCoords[1]) {
-                                        distance++;
+
+                        //checks tj and tk elements in same row
+                        for (int k = i, l = j + 1; l < DIMENSION; l++) {
+                            if (board.state[k][l] != 0) {
+                                Integer[] comparedGoalStateCoords = GOAL_COORDINATE_MAP.get(board.state[k][l]);
+
+                                //checks tj and tk elements goal state position are both in this row
+                                if (valueGoalStateCoords[0] == k && comparedGoalStateCoords[0] == k) {
+
+                                    //tj is to the right of tk and goal position of tj is to the left of the goal position of tk
+                                    if (valueGoalStateCoords[1] > comparedGoalStateCoords[1]) {
+                                        linearConflictDistance++;
                                     }
                                 }
 
                             }
-                            columnStart = 0;
+                        }
+
+                        //checks tj and tk elements in same column
+                        for (int k = i + 1, l = j; k < DIMENSION; k++) {
+                            if (board.state[k][l] != 0) {
+                                Integer[] comparedGoalStateCoords = GOAL_COORDINATE_MAP.get(board.state[k][l]);
+
+                                //checks tj and tk elements goal state position are both in this column
+                                if (valueGoalStateCoords[1] == l && comparedGoalStateCoords[1] == l) {
+
+                                    //tj is to the right of tk and goal position of tj is to the left of the goal position of tk
+                                    if (valueGoalStateCoords[0] > comparedGoalStateCoords[0]) {
+                                        linearConflictDistance++;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
-            return distance;
+            return manhattanDistance + 2 * linearConflictDistance;
         }
+    }
+
+    /** TEST FOR SOLVABILITY **/
+
+    public static int getSumOfPermutationInversions(Board board) {
+        int distance = 0;
+        for (int i = 0; i < DIMENSION; i++) {
+            for (int j = 0; j < DIMENSION; j++) {
+                if (board.state[i][j] != 0) {
+                    Integer[] valueGoalStateCoords = GOAL_COORDINATE_MAP.get(board.state[i][j]);
+                    //determine if following tiles should be before or after by looking at coordinates of following tiles
+                    int columnStart = j;
+                    for (int k = i; k < DIMENSION; k++) {
+                        for (int l = columnStart; l < DIMENSION; l++) {
+                            if (board.state[k][l] != 0) {
+                                Integer[] comparedGoalStateCoords = GOAL_COORDINATE_MAP.get(board.state[k][l]);
+                                //check if the row or column of the goal state coords are before or after current tile
+                                if (valueGoalStateCoords[0] > comparedGoalStateCoords[0]) {
+                                    distance++;
+                                } else if (valueGoalStateCoords[0] == comparedGoalStateCoords[0] &&
+                                        valueGoalStateCoords[1] > comparedGoalStateCoords[1]) {
+                                    distance++;
+                                }
+                            }
+
+                        }
+                        columnStart = 0;
+                    }
+                }
+            }
+        }
+        return distance;
+    }
+
+    public static boolean isSolvable(Board startBoard) {
+        int sumOfPermutationInversion = getSumOfPermutationInversions(startBoard);
+        if (sumOfPermutationInversion % 2 == 1) {
+            return false;
+        }
+        return true;
     }
 }

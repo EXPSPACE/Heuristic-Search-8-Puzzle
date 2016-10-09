@@ -22,9 +22,29 @@ public class DriverBoard {
                 {0, 8, 4},
                 {1, 7, 2}};
 
+
+        //INITIALIZE 24 OFF
+//        startBoard.state = new int[][]{
+//                {8, 4, 7},
+//                {6, 3, 5},
+//                {0, 1, 2}};
+
+        //INITIALIZE 26 OFF
+//        startBoard.state = new int[][]{
+//                {8, 7, 6},
+//                {5, 4, 3},
+//                {0, 1, 2}};
+
+        //INITIALIZE 28 OFF
+//        startBoard.state = new int[][]{
+//                {8, 6, 0},
+//                {2, 5, 7},
+//                {3, 4, 1}};
+
+
         startBoard.setBlankXY();
 
-        if(!isSolvable(startBoard)) {
+        if (!Board.isSolvable(startBoard)) {
             System.out.println("Initial configuration is unsolvable");
             return;
         }
@@ -59,7 +79,7 @@ public class DriverBoard {
             System.out.println("2 - Manhattan ");
             System.out.println("3 - Minimum hamming manhattan ");
             System.out.println("4 - Learning heuristic using linear combination of features - (Not admissible) ");
-            System.out.println("5 - Permutation ");
+            System.out.println("5 - Manhattan plus linear conflict ");
 
             int heuristicAlgo = kb.nextInt();
 
@@ -76,8 +96,8 @@ public class DriverBoard {
                 case Board.HEURISTIC_LEARNING_FEATURES:
                     startBoard.setHeuristic(Board.HEURISTIC_LEARNING_FEATURES);
                     break;
-                case Board.HEURISTIC_PERMUTATION:
-                    startBoard.setHeuristic(Board.HEURISTIC_PERMUTATION);
+                case Board.HEURISTIC_MANHATTAN_PLUS_LINEAR_CONFLICT:
+                    startBoard.setHeuristic(Board.HEURISTIC_MANHATTAN_PLUS_LINEAR_CONFLICT);
                     break;
             }
 
@@ -89,15 +109,5 @@ public class DriverBoard {
         long estimatedTime = System.nanoTime() - startTime;
 
         System.out.println("Estimated millisecond execution time: " + estimatedTime / 1000000.0);
-    }
-
-    public static boolean isSolvable(Board startBoard) {
-        startBoard.setHeuristic(Board.HEURISTIC_PERMUTATION);
-        int heuristicValue = startBoard.getHeuristicValue();
-
-        if(heuristicValue % 2 == 1) {
-            return false;
-        }
-        return true;
     }
 }

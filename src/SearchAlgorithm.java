@@ -13,15 +13,15 @@ public abstract class SearchAlgorithm {
     public static final int DEPTH_SEARCH = 2;
     public static final int BEST_FIRST_SEARCH = 3;
     public static final int ASTAR_SEARCH = 4;
-
-    public HashMap<Node, Node> parentMap;
     public static int nodeGenCount = 0;
+    public HashMap<Node, Node> parentMap;
 
-    public SearchAlgorithm() {}
+    public SearchAlgorithm() {
+    }
 
     public SearchAlgorithm(Node startNode) {
         this.parentMap = new HashMap<>();
-        this.parentMap.put(startNode,null);
+        this.parentMap.put(startNode, null);
     }
 
     public abstract void searchTree(Node startNode);
@@ -31,7 +31,7 @@ public abstract class SearchAlgorithm {
 
         System.out.println("PATH TO GOAL STATE: ");
         Node node = leafNode;
-        while(node != null) {
+        while (node != null) {
             nodeSequence.add(node);
 
             node = parentMap.get(node);
@@ -39,7 +39,7 @@ public abstract class SearchAlgorithm {
 
         Collections.reverse(nodeSequence);
 
-        for(Node pathNode: nodeSequence) {
+        for (Node pathNode : nodeSequence) {
             System.out.println(pathNode.toString(false));
         }
 

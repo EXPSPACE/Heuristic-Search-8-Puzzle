@@ -37,6 +37,7 @@ public class DriverTreeNode {
         node3.visited = false;
         node4.visited = false;
         node5.visited = false;
+        sa.nodeGenCount = 0;
 
         System.out.println("DEPTH FIRST SEARCH");
         System.out.println("====================");
@@ -49,6 +50,7 @@ public class DriverTreeNode {
         node3.visited = false;
         node4.visited = false;
         node5.visited = false;
+        sa.nodeGenCount = 0;
 
         System.out.println("BEST FIRST SEARCH");
         System.out.println("====================");
@@ -61,6 +63,7 @@ public class DriverTreeNode {
         node3.visited = false;
         node4.visited = false;
         node5.visited = false;
+        sa.nodeGenCount = 0;
 
         System.out.println("ASTAR FIRST SEARCH");
         System.out.println("====================");
