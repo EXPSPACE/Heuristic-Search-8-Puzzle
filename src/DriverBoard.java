@@ -8,25 +8,26 @@ public class DriverBoard {
         SearchAlgorithm sa = null;
         Board startBoard = new Board();
 
-//        //SIMPLE TEST INITIALIZE 2 OFF
-//        //initializing start configuration
-//        startBoard.state = new int[][]{
-//                {1, 3, 0},
-//                {8, 2, 4},
-//                {7, 6, 5}};
-//
-//        startBoard.blank_x = 0;
-//        startBoard.blank_y = 2;
-
-        //TEST INITIALIZE 10 OFF
         //initializing start configuration
-        startBoard.state = new int[][]{
-                {8, 1, 3},
-                {6, 4, 5},
-                {2, 7, 0}};
 
-        startBoard.blank_x = 2;
-        startBoard.blank_y = 2;
+        //INITIALIZE 10 OFF
+//        startBoard.state = new int[][]{
+//                {8, 1, 3},
+//                {6, 4, 5},
+//                {2, 7, 0}};
+//
+        //INITIALIZE 21 OFF
+        startBoard.state = new int[][]{
+                {5, 6, 3},
+                {0, 8, 4},
+                {1, 7, 2}};
+
+        startBoard.setBlankXY();
+
+        if(!isSolvable(startBoard)) {
+            System.out.println("Initial configuration is unsolvable");
+            return;
+        }
 
         System.out.println("Select search algorithm: ");
         System.out.println("1 - Breadth First Search ");
@@ -36,7 +37,6 @@ public class DriverBoard {
 
         Scanner kb = new Scanner(System.in);
         int searchAlgo = kb.nextInt();
-
 
         switch (searchAlgo) {
             case SearchAlgorithm.BREADTH_SEARCH:
@@ -58,7 +58,7 @@ public class DriverBoard {
             System.out.println("1 - Hamming ");
             System.out.println("2 - Manhattan ");
             System.out.println("3 - Minimum hamming manhattan ");
-            System.out.println("4 - Not admissable ");
+            System.out.println("4 - Learning heuristic using linear combination of features - (Not admissible) ");
             System.out.println("5 - Permutation ");
 
             int heuristicAlgo = kb.nextInt();
@@ -73,8 +73,8 @@ public class DriverBoard {
                 case Board.HEURISTIC_MIN_HAM_MAN:
                     startBoard.setHeuristic(Board.HEURISTIC_MIN_HAM_MAN);
                     break;
-                case Board.HEURISTIC_NOT_ADMISSIBLE:
-                    startBoard.setHeuristic(Board.HEURISTIC_NOT_ADMISSIBLE);
+                case Board.HEURISTIC_LEARNING_FEATURES:
+                    startBoard.setHeuristic(Board.HEURISTIC_LEARNING_FEATURES);
                     break;
                 case Board.HEURISTIC_PERMUTATION:
                     startBoard.setHeuristic(Board.HEURISTIC_PERMUTATION);
@@ -88,6 +88,16 @@ public class DriverBoard {
         sa.searchTree(startBoard);
         long estimatedTime = System.nanoTime() - startTime;
 
-        System.out.println("\nEstimated millisecond execution time: " + estimatedTime / 1000000.0);
+        System.out.println("Estimated millisecond execution time: " + estimatedTime / 1000000.0);
+    }
+
+    public static boolean isSolvable(Board startBoard) {
+        startBoard.setHeuristic(Board.HEURISTIC_PERMUTATION);
+        int heuristicValue = startBoard.getHeuristicValue();
+
+        if(heuristicValue % 2 == 1) {
+            return false;
+        }
+        return true;
     }
 }

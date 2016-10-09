@@ -41,7 +41,7 @@ public class BreadthFirstSearch extends SearchAlgorithm {
 
             closedList.add(element);
             ArrayList<Node> childNodes = element.getChildNodes();
-            //TODO num generated nodes
+            nodeGenCount += childNodes.size();
 
             for (Node node : childNodes) {
                 if (node != null && !node.visited && !closedList.contains(node)) {

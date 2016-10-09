@@ -41,6 +41,8 @@ public class AStarSearch extends SearchAlgorithm {
 
             closedList.add(element);
             ArrayList<Node> childNodes = element.getChildNodes();
+            nodeGenCount += childNodes.size();
+
             for (Node node : childNodes) {
                 if (node != null && !node.visited && !closedList.contains(node)) {
                     openList.add(node);
@@ -55,7 +57,6 @@ public class AStarSearch extends SearchAlgorithm {
 
             for (Node node : openList) {
                 System.out.println(node.toString(true));
-                ;
             }
         }
     }

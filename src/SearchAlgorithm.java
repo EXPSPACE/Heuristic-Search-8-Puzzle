@@ -15,6 +15,7 @@ public abstract class SearchAlgorithm {
     public static final int ASTAR_SEARCH = 4;
 
     public HashMap<Node, Node> parentMap;
+    public static int nodeGenCount = 0;
 
     public SearchAlgorithm() {}
 
@@ -28,7 +29,6 @@ public abstract class SearchAlgorithm {
     public void printPath(Node leafNode) {
         ArrayList<Node> nodeSequence = new ArrayList<>();
 
-        System.out.println("DISTANCE: " + leafNode.distance);
         System.out.println("PATH TO GOAL STATE: ");
         Node node = leafNode;
         while(node != null) {
@@ -42,5 +42,9 @@ public abstract class SearchAlgorithm {
         for(Node pathNode: nodeSequence) {
             System.out.println(pathNode.toString(false));
         }
+
+        System.out.println();
+        System.out.println("DISTANCE: " + leafNode.distance);
+        System.out.println("NODES GENERATED: " + nodeGenCount);
     }
 }

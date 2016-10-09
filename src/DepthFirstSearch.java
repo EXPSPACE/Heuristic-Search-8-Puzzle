@@ -40,6 +40,7 @@ public class DepthFirstSearch extends SearchAlgorithm {
 
             closedList.add(element);
             ArrayList<Node> childNodes = element.getChildNodes();
+            nodeGenCount += childNodes.size();
 
             for (Node node : childNodes) {
                 if (node != null && !node.visited && !closedList.contains(node)) {

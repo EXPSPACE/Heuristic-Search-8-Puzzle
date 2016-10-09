@@ -10,7 +10,7 @@ public class Board extends Node<Board> {
     public static final int HEURISTIC_HAMMING = 1;
     public static final int HEURISTIC_MANHATTAN = 2;
     public static final int HEURISTIC_MIN_HAM_MAN = 3;
-    public static final int HEURISTIC_NOT_ADMISSIBLE = 4;
+    public static final int HEURISTIC_LEARNING_FEATURES = 4;
     public static final int HEURISTIC_PERMUTATION = 5;
 
     //final goal state for each board - 0 represents the blank state
@@ -131,6 +131,17 @@ public class Board extends Node<Board> {
         return childBoards;
     }
 
+    public void setBlankXY() {
+        for (int i = 0; i < DIMENSION; i++) {
+            for (int j = 0; j < DIMENSION; j++) {
+                if(state[i][j] == 0) {
+                    blank_x = i;
+                    blank_y = j;
+                }
+            }
+        }
+    }
+
     public void copyState(Board childBoard) {
         for (int i = 0; i < DIMENSION; i++) {
             for (int j = 0; j < DIMENSION; j++) {
@@ -177,10 +188,10 @@ public class Board extends Node<Board> {
         sb.append("\n" + indentSpace + "Move: " + moveString);
         sb.append("\n" + indentSpace + "Parent node ID: " + parentNodeID);
         sb.append("\n" + indentSpace + "Heuristic: " + HEURISTIC_STRING);
-        sb.append("\n" + indentSpace + "Heuristic value: " + heuristicValue);
-        sb.append("\n" + indentSpace + "Distance: " + distance);
+        sb.append("\n" + indentSpace + "Heuristic value h(n): " + heuristicValue);
+        sb.append("\n" + indentSpace + "Distance g(n): " + distance);
         if (heuristicFunction != null) {
-            sb.append("\n" + indentSpace + "Estimated distance to goal: " + (getHeuristicValue() + distance));
+            sb.append("\n" + indentSpace + "Estimated distance to goal f(n): " + (getHeuristicValue() + distance));
         }
         return sb.toString();
     }
@@ -212,9 +223,9 @@ public class Board extends Node<Board> {
                 heuristicFunction = new MinHammingManhattan();
                 HEURISTIC_STRING = "MIN_HAM_MAN";
                 break;
-            case HEURISTIC_NOT_ADMISSIBLE:
-                heuristicFunction = new NotAdmissable();
-                HEURISTIC_STRING = "NOT_ADMISSABLE";
+            case HEURISTIC_LEARNING_FEATURES:
+                heuristicFunction = new LearningHeuristic();
+                HEURISTIC_STRING = "LEARNING_NOT_ADMISSABLE";
                 break;
             case HEURISTIC_PERMUTATION:
                 heuristicFunction = new Permutation();
@@ -228,7 +239,7 @@ public class Board extends Node<Board> {
      * used strategy pattern for different heuristic functions
      **/
 
-    //h0(N) - hamming parentDistance
+    //h0(N) hamming distance - number of misplaced tiles
     private class Hamming implements HeuristicFunction {
         @Override
         public int getHeuristicValue(Board board) {
@@ -244,7 +255,7 @@ public class Board extends Node<Board> {
         }
     }
 
-    //h1(N) - manhattan distance
+    //h1(N) manhattan distance - sum of moves for each tile to move to final position
     private class Manhattan implements HeuristicFunction {
         @Override
         public int getHeuristicValue(Board board) {
@@ -266,7 +277,8 @@ public class Board extends Node<Board> {
     }
 
 
-    //h2(N) - minimum between hamming parentDistance and manhattan parentDistance
+    //h2(N) min_hamming_manhattan - minimum between hamming parentDistance and manhattan parentDistance
+    //TODO max?
     private class MinHammingManhattan implements HeuristicFunction {
         @Override
         public int getHeuristicValue(Board board) {
@@ -274,20 +286,24 @@ public class Board extends Node<Board> {
         }
     }
 
-    //TODO:
-    //h3(N) - a heuristic that is not admissible (and does not implement A*)
-    private class NotAdmissable implements HeuristicFunction {
+    //h3(N) - a heuristic that is not admissible, uses a linear combination of hamming and manhattan "features",
+    //c1, c2 should be adjusted to fit actual data on solution costs
+    private class LearningHeuristic implements HeuristicFunction {
         @Override
         public int getHeuristicValue(Board board) {
-            return new Hamming().getHeuristicValue(board) + new Manhattan().getHeuristicValue(board);
+            //TODO: curve fit c1 and c2 to fit actual solution costs
+            int c1 = 1;
+            int c2 = 2;
+            int hammingValue = new Hamming().getHeuristicValue(board);
+            int manhattanValue = new Manhattan().getHeuristicValue(board);
+            return  c1 * hammingValue + c2 * manhattanValue;
         }
     }
 
 
-    //h4(N) - sum of permutation inversions
-    //for each numbered tile, count how many tiles on its right should be on its left in the goal state.
+    //h4(N) sum of permutation inversions - for each numbered tile, count how many tiles on its right should be on its left in the goal state.
     //(admissible and better than either Manhattan parentDistance or hamming tiles)
-    //TODO: make sure its working properly
+    //TODO not admissable (overestimates by 1?)
     private class Permutation implements HeuristicFunction {
         @Override
         public int getHeuristicValue(Board board) {
