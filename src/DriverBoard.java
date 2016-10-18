@@ -22,19 +22,6 @@ public class DriverBoard {
                 {0, 8, 4},
                 {1, 7, 2}};
 
-
-        //INITIALIZE 24 OFF
-//        startBoard.state = new int[][]{
-//                {8, 4, 7},
-//                {6, 3, 5},
-//                {0, 1, 2}};
-
-        //INITIALIZE 26 OFF
-//        startBoard.state = new int[][]{
-//                {8, 7, 6},
-//                {5, 4, 3},
-//                {0, 1, 2}};
-
         //INITIALIZE 28 OFF
 //        startBoard.state = new int[][]{
 //                {8, 6, 0},
@@ -75,7 +62,7 @@ public class DriverBoard {
 
         if (searchAlgo == SearchAlgorithm.BEST_FIRST_SEARCH || searchAlgo == SearchAlgorithm.ASTAR_SEARCH) {
             System.out.println("Select heuristic algorithm: ");
-            System.out.println("1 - Hamming ");
+            System.out.println("1 - Misplaced ");
             System.out.println("2 - Manhattan ");
             System.out.println("3 - Minimum hamming manhattan ");
             System.out.println("4 - Learning heuristic using linear combination of features - (Not admissible) ");
@@ -84,8 +71,8 @@ public class DriverBoard {
             int heuristicAlgo = kb.nextInt();
 
             switch (heuristicAlgo) {
-                case Board.HEURISTIC_HAMMING:
-                    startBoard.setHeuristic(Board.HEURISTIC_HAMMING);
+                case Board.HEURISTIC_MISPLACED:
+                    startBoard.setHeuristic(Board.HEURISTIC_MISPLACED);
                     break;
                 case Board.HEURISTIC_MANHATTAN:
                     startBoard.setHeuristic(Board.HEURISTIC_MANHATTAN);

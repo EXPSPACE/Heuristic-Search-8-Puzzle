@@ -13,10 +13,10 @@ public class BreadthFirstSearch extends SearchAlgorithm {
 
     @Override
     public void searchTree(Node startNode) {
-        Queue<Node> queue = new LinkedList<Node>();
+        Queue<Node> openList = new LinkedList<Node>();
         ArrayList<Node> closedList = new ArrayList<>();
 
-        queue.add(startNode);
+        openList.add(startNode);
         startNode.visited = true;
 
         //check if element is goal state
@@ -28,8 +28,8 @@ public class BreadthFirstSearch extends SearchAlgorithm {
             return;
         }
 
-        while (!queue.isEmpty()) {
-            Node element = queue.poll();
+        while (!openList.isEmpty()) {
+            Node element = openList.poll();
 
             System.out.println("");
             System.out.println("CURRENT NODE: ");
@@ -45,7 +45,7 @@ public class BreadthFirstSearch extends SearchAlgorithm {
 
             for (Node node : childNodes) {
                 if (node != null && !node.visited && !closedList.contains(node)) {
-                    queue.add(node);
+                    openList.add(node);
                     node.visited = true;
                     this.parentMap.put(node, element);
 
@@ -63,7 +63,7 @@ public class BreadthFirstSearch extends SearchAlgorithm {
             System.out.println("     OPEN LIST NODES:");
             System.out.println("     ===============");
 
-            for (Node node : queue) {
+            for (Node node : openList) {
                 System.out.println(node.toString(true));
             }
 
